@@ -1,5 +1,7 @@
 'use strict';
 
+var crypto = require('crypto');
+
 /**
  * Represents an Event to be scheduled in Google Calendar
  */
@@ -41,4 +43,21 @@ Chat.prototype.getEvents = function () {
 
   this.messageBody.replace(matcher, addEvent.bind(this));
   return events;
+};
+
+/**
+ * Create a hash representing a scheduled Event.
+ */
+function hashEvent(event) {
+  if (event.valid) {
+    var hash = crypto.createHash('sha256');
+    return hash.update(event.who + event.what + event.when);
+  }
+}
+
+/**
+ * The Webtask
+ */
+module.exports = function (context, doneCallback) {
+  // Perform the 
 };
