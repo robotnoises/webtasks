@@ -1,11 +1,10 @@
 'use strict';
 
+// Todo: need to pass these as secrets in a Webtask Token
 const TWILIO_SID = process.env.TWILIO_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE = process.env.TWILIO_PHONE || '';
 const MY_PHONE = process.env.MY_PHONE || '';
-
-const twilio = require('twilio')(TWILIO_SID, TWILIO_AUTH_TOKEN);
 
 const ADJECTIVES = {
   0: 'really, really bad',
@@ -20,6 +19,9 @@ const COLD_THRESHOLD = 40;    // Low temperature
 const SWEATY_THRESHOLD = 65;  // Humidity
 const SNEEZE_THRESHOLD = 6;   // Pollen Count 
 
+/**
+ * Weather, which holds all of today's relevant weather data
+ */
 function Weather(w) {
   if (w) {
     this.tempHigh = w.temphigh || null;
@@ -39,7 +41,7 @@ Weather.prototype.whatIsTodayGonnaBeLike = function () {
     let intro = 'Good morning. Today\'s temperature will be a high of ' + this.tempHigh + ' and a low of ' + this.tempLow + '. ';
     let allergies = (this.tooDamnSneezy) ? 'Make sure to take your meds, because there is a high pollen count, ' : 'Breathe easy today, ';
     let humidity = (this.tooDamnSweaty) ? 'and dress comfortably because it\'s going to be a sweaty one. ' : 'and wear some decent clothing, because it\'s going to be nice out. ';
-    let condition = 'The average condition is ' + this.condition + '.';   
+    let condition = 'The average condition is ' + this.condition + '. ';   
     
     return intro + allergies + humidity + condition;
 };
@@ -58,25 +60,27 @@ Weather.prototype.justTellMe = function () {
     return (dayScore >= 0) ? dayScore : 0;
   }
 
-  return 'Overall, today\'s gonna be ' + ADJECTIVES[calcDayScore.call(this)] + '.';
+  return 'Overall, today\'s gonna be ' + ADJECTIVES[calcDayScore.call(this)] + '. ';
 };
 
 /**
  * The Webtask
  */
 modules.export = function (context, doneCallback) {
+  const twilio = require('twilio')(TWILIO_SID, TWILIO_AUTH_TOKEN);
+
   let weather = new Weather(context.data);
 
   //Send an SMS text message to my phone
   twilio.sendMessage({
     'to': '+' + MY_PHONE,
     'from': '+' + TWILIO_PHONE, 
-    'body': w.justTellMe()
+    'body': w.whatIsTodayGonnaBeLike() + w.justTellMe()
   }, function (err, responseData) {
     if (!err) { 
-      doneCallback();
+      doneCallback(null, 'OK');
     } else {
-      // Todo log the error in Webtask storage
+      console.error(err);
     }
   });
 };
