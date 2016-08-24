@@ -1,10 +1,11 @@
 'use strict';
 
-// Todo: need to pass these as secrets in a Webtask Token
-const TWILIO_SID = process.env.TWILIO_SID || '';
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
-const TWILIO_PHONE = process.env.TWILIO_PHONE || '';
-const MY_PHONE = process.env.MY_PHONE || '';
+/**
+ * Constants
+ */
+
+const TWILIO_PHONE = '+18508959825';
+const MY_PHONE = '+8504912060';
 
 const ADJECTIVES = {
   0: 'really, really bad',
@@ -20,20 +21,21 @@ const SWEATY_THRESHOLD = 65;  // Humidity
 const SNEEZE_THRESHOLD = 6;   // Pollen Count 
 
 /**
- * Weather, which holds all of today's relevant weather data
+ * A Weather object constructor, which holds all of today's relevant weather data
  */
+
 function Weather(w) {
   if (w) {
     this.tempHigh = w.temphigh || null;
     this.tempLow = w.templow || null;
     this.humidity = w.humidity || null;
     this.allergy = w.pollen || null;
-    this.condition = w.condition.toLowerCase() || null;
+    this.forecast = w.forecast || null;
     this.tooDamnHot = (this.tempHigh) ? parseInt(this.tempHigh, 10) >= HOT_THRESHOLD : true;
     this.tooDamnCold = (this.tempLow) ? parseInt(this.tempLow, 10) <= COLD_THRESHOLD : true;
     this.tooDamnSweaty = (this.humidity) ? parseInt(this.humidity) >= SWEATY_THRESHOLD : true;
     this.tooDamnSneezy = (this.allergy) ? parseFloat(this.allergy) >= SNEEZE_THRESHOLD : true;
-    this.tooDamnCloudy = (this.condition) ? (this.condition !== 'sunny' && this.condition !== 'mostly sunny') : true;
+    this.tooDamnCloudy = (this.forecast) ? (this.forecast !== 'Sunny' && this.forecast !== 'Mostly Sunny') : true;
   }
 }
 
@@ -41,9 +43,9 @@ Weather.prototype.whatIsTodayGonnaBeLike = function () {
     let intro = 'Good morning. Today\'s temperature will be a high of ' + this.tempHigh + ' and a low of ' + this.tempLow + '. ';
     let allergies = (this.tooDamnSneezy) ? 'Make sure to take your meds, because there is a high pollen count, ' : 'Breathe easy today, ';
     let humidity = (this.tooDamnSweaty) ? 'and dress comfortably because it\'s going to be a sweaty one. ' : 'and wear some decent clothing, because it\'s going to be nice out. ';
-    let condition = 'The average condition is ' + this.condition + '. ';   
+    let forecast = 'The average condition is ' + this.forecast + '. ';   
     
-    return intro + allergies + humidity + condition;
+    return intro + allergies + humidity + forecast;
 };
 
 Weather.prototype.justTellMe = function () {
@@ -66,10 +68,12 @@ Weather.prototype.justTellMe = function () {
 /**
  * The Webtask
  */
-modules.export = function (context, doneCallback) {
-  const twilio = require('twilio')(TWILIO_SID, TWILIO_AUTH_TOKEN);
 
+module.exports = function (context, doneCallback) {
   let weather = new Weather(context.data);
+  let sid = context.secrets.sid || '';
+  let auth = context.secrets.auth || '';
+  let twilio = require('twilio')(sid, auth);
 
   //Send an SMS text message to my phone
   twilio.sendMessage({
