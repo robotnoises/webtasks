@@ -5,7 +5,7 @@
  */
 
 const TWILIO_PHONE = '+18508959825';
-const MY_PHONE = '+8504912060';
+const MY_PHONE = '+18504912060';
 
 const ADJECTIVES = {
   0: 'really, really bad',
@@ -70,7 +70,7 @@ Weather.prototype.justTellMe = function () {
  */
 
 module.exports = function (context, doneCallback) {
-  let weather = new Weather(context.data);
+  let weather = new Weather(context.query);
   let sid = context.secrets.sid || '';
   let auth = context.secrets.auth || '';
   let twilio = require('twilio')(sid, auth);
@@ -79,7 +79,7 @@ module.exports = function (context, doneCallback) {
   twilio.sendMessage({
     'to': '+' + MY_PHONE,
     'from': '+' + TWILIO_PHONE, 
-    'body': w.whatIsTodayGonnaBeLike() + w.justTellMe()
+    'body': weather.whatIsTodayGonnaBeLike() + weather.justTellMe()
   }, function (err, responseData) {
     if (!err) { 
       doneCallback(null, 'OK');
