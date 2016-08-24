@@ -11,7 +11,6 @@ module.exports = function (context, doneCallback) {
    */
 
   const TWILIO_PHONE = '+18508959825';
-  const MY_PHONE = '+18504912060';
 
   const ADJECTIVES = {
     0: 'really, really bad',
@@ -45,6 +44,7 @@ module.exports = function (context, doneCallback) {
     }
   }
 
+  // Returns a nice summary of today's weather
   Weather.prototype.whatIsTodayGonnaBeLike = function () {
     let intro = 'Good morning. Today\'s temperature will be a high of ' + this.tempHigh + ' and a low of ' + this.tempLow + '. ';
     let allergies = (this.tooDamnSneezy) ? 'Make sure to take your meds, because there is a high pollen count, ' : 'Breathe easy today, ';
@@ -54,13 +54,14 @@ module.exports = function (context, doneCallback) {
     return intro + allergies + humidity + forecast;
   };
 
+  // Returns a short, opinionated summary of today's weather
   Weather.prototype.justTellMe = function () {
 
     function calcDayScore() {
       let dayScore = 4;
 
-      if (this.tooDamnHot) dayScore--;
-      if (this.tooDamnCold) dayScore--;
+      if (this.tooDamnHot)    dayScore--;
+      if (this.tooDamnCold)   dayScore--;
       if (this.tooDamnSweaty) dayScore--;
       if (this.tooDamnSneezy) dayScore--;
       if (this.tooDamnCloudy) dayScore--;
@@ -75,11 +76,13 @@ module.exports = function (context, doneCallback) {
   let weather = new Weather(context.data);
   let sid = context.secrets.sid || '';
   let auth = context.secrets.auth || '';
-  let twilio = require('twilio')(sid, auth);
+  let phoneToText = '+' + context.data.phone || '';
+  
+  const twilio = require('twilio')(sid, auth);
 
   //Send an SMS text message to my phone
   twilio.sendMessage({
-    'to': '+' + MY_PHONE,
+    'to': '+' + phoneToText,
     'from': '+' + TWILIO_PHONE,
     'body': weather.whatIsTodayGonnaBeLike() + weather.justTellMe()
   }, function (err, responseData) {
