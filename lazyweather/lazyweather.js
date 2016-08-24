@@ -70,7 +70,7 @@ Weather.prototype.justTellMe = function () {
  */
 
 module.exports = function (context, doneCallback) {
-  let weather = new Weather(context.query);
+  let weather = new Weather(context.data);
   let sid = context.secrets.sid || '';
   let auth = context.secrets.auth || '';
   let twilio = require('twilio')(sid, auth);
