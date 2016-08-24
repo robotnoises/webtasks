@@ -74,17 +74,19 @@ module.exports = function (context, doneCallback) {
   let sid = context.secrets.sid || '';
   let auth = context.secrets.auth || '';
   let twilio = require('twilio')(sid, auth);
+  
+  doneCallback(null, JSON.stringify(weather));
 
-  //Send an SMS text message to my phone
-  twilio.sendMessage({
-    'to': '+' + MY_PHONE,
-    'from': '+' + TWILIO_PHONE, 
-    'body': weather.whatIsTodayGonnaBeLike() + weather.justTellMe()
-  }, function (err, responseData) {
-    if (!err) { 
-      doneCallback(null, 'OK');
-    } else {
-      console.error(err);
-    }
-  });
+  // //Send an SMS text message to my phone
+  // twilio.sendMessage({
+  //   'to': '+' + MY_PHONE,
+  //   'from': '+' + TWILIO_PHONE, 
+  //   'body': weather.whatIsTodayGonnaBeLike() + weather.justTellMe()
+  // }, function (err, responseData) {
+  //   if (!err) { 
+  //     doneCallback(null, 'OK');
+  //   } else {
+  //     console.error(err);
+  //   }
+  // });
 };
