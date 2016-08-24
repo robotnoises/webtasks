@@ -75,7 +75,7 @@ module.exports = function (context, doneCallback) {
   let auth = context.secrets.auth || '';
   let twilio = require('twilio')(sid, auth);
   
-  doneCallback(null, JSON.stringify(weather));
+  doneCallback(null, JSON.stringify(context));
 
   // //Send an SMS text message to my phone
   // twilio.sendMessage({
