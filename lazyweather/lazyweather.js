@@ -10,8 +10,10 @@ module.exports = function (context, doneCallback) {
    * Constants
    */
 
+  // My Twilio Phone number (required to place a call or send a text)
   const TWILIO_PHONE = '+18508959825';
 
+  // Adjectives to help us describe the day
   const ADJECTIVES = {
     0: 'really, really bad',
     1: 'forgettable',
@@ -19,6 +21,8 @@ module.exports = function (context, doneCallback) {
     3: 'pretty darn nice',
     4: 'incredible'
   };
+
+  // My arbitrary opinion on what good weather feels like...
 
   const HOT_THRESHOLD = 85;     // High temperature
   const COLD_THRESHOLD = 40;    // Low temperature 
@@ -74,13 +78,15 @@ module.exports = function (context, doneCallback) {
 
   // Build a weather object
   let weather = new Weather(context.data);
+
+  // Gather params for the phone call
   let sid = context.secrets.sid || '';
   let auth = context.secrets.auth || '';
   let phoneToText = '+' + context.data.phone || '';
   
-  const twilio = require('twilio')(sid, auth);
+  let twilio = require('twilio')(sid, auth);
 
-  //Send an SMS text message to my phone
+  //Send an SMS text message
   twilio.sendMessage({
     'to': '+' + phoneToText,
     'from': '+' + TWILIO_PHONE,
